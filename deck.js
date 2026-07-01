@@ -12,7 +12,7 @@ async function init() {
     }
 }
 
-// ---------- LOAD DECK FILE (UPDATED FOR BATCH FETCH) ----------
+// ---------- LOAD DECK FILE ----------
 async function loadDeck(file, container) {
     const res = await fetch(file);
     const deckText = await res.text();
@@ -30,7 +30,8 @@ async function loadDeck(file, container) {
     await renderDeck(deck, container);
 }
 
-// ---------- PARSE DECK TEXT (FIXED FOR MIXED-CASE SETS) ----------
+// ---------- PARSE DECK TEXT ----------
+// ---------- PARSE DECK TEXT (FIXED FOR NUMERIC SET CODES) ----------
 function parseDeck(text) {
     const lines = text.trim().split("\n");
 
@@ -47,14 +48,18 @@ function parseDeck(text) {
             continue;
         }
 
-        // THE FIX: Changed [A-Z0-9] to [A-Za-z0-9] so it captures lowercase set codes seamlessly
-        const match = line.match(/^(\d+)\s+(.+?)\s+\[([A-Za-z0-9]+)\]$/i);
+        // THE FIX: Replaced lazy matching (.+?) with a strict non-bracket match ([^\[]+)
+        // This isolates the card name cleanly up to the "[" marker, completely ignoring digits inside the set tags.
+        const match = line.match(/^(\d+)\s+([^\[]+)\s+\[([A-Za-z0-9]+)\]$/i);
 
-        if (!match) continue;
+        if (!match) {
+            console.warn("Regex failed to parse line:", line);
+            continue;
+        }
 
         const qty = parseInt(match[1], 10);
         const name = match[2].trim();
-        const set = match[3].toUpperCase(); // This normalizes it to uppercase for your cache key!
+        const set = match[3].toLowerCase(); // Normalized to lowercase for cache synchronization
 
         const card = { qty, name, set };
 
@@ -99,7 +104,7 @@ async function renderDeck(deck, container) {
             const img = document.createElement("img");
             img.className = "deck-card";
             img.src = imgUrl;
-            img.title = `${card.name} [${card.set}]`;
+            img.title = `${card.name} [${card.set.toUpperCase()}]`;
             
             img.style.setProperty("--offset", mainColCardCount);
             img.style.zIndex = mainColCardCount;
@@ -113,7 +118,6 @@ async function renderDeck(deck, container) {
 
     // 2. RENDER SIDEBOARD (Only if sideboard cards exist)
     if (deck.sideboard && deck.sideboard.length > 0) {
-        // Add a visual separator section
         const sbHeader = document.createElement("h3");
         sbHeader.textContent = "Sideboard";
         sbHeader.style.margin = "40px 0 20px 0";
@@ -122,7 +126,6 @@ async function renderDeck(deck, container) {
         const sbWrapper = document.createElement("div");
         sbWrapper.className = "deck-columns";
 
-        // Configured for 5 columns wide, max 3 cards deep per column
         const SB_COLS = 5; 
         const SB_MAX_PER_COL = 3;
 
@@ -140,7 +143,6 @@ async function renderDeck(deck, container) {
             const imgUrl = await fetchCardImage(card);
 
             for (let i = 0; i < card.qty; i++) {
-                // If a column hits 3 cards, move strictly to the next column
                 if (sbColCardCount >= SB_MAX_PER_COL) {
                     sbColIdx++;
                     sbColCardCount = 0;
@@ -152,7 +154,7 @@ async function renderDeck(deck, container) {
                 const img = document.createElement("img");
                 img.className = "deck-card";
                 img.src = imgUrl;
-                img.title = `${card.name} [${card.set}] (SB)`;
+                img.title = `${card.name} [${card.set.toUpperCase()}] (SB)`;
                 
                 img.style.setProperty("--offset", sbColCardCount);
                 img.style.zIndex = sbColCardCount;
@@ -166,38 +168,16 @@ async function renderDeck(deck, container) {
     }
 }
 
-// ---------- COLUMN RENDER ----------
-async function renderColumn(cards) {
-    const col = document.createElement("div");
-    col.className = "deck-column";
-
-    for (const card of cards) {
-        const imgUrl = await fetchCardImage(card);
-
-        for (let i = 0; i < card.qty; i++) {
-            const img = document.createElement("img");
-            img.className = "deck-card";
-            img.src = imgUrl;
-            img.title = `${card.name} [${card.set}]`;
-            col.appendChild(img);
-        }
-    }
-
-    return col;
-}
-
-// ---------- BATCH REQUEST MANAGER (INDEX MATCHING FIX) ----------
+// ---------- BATCH REQUEST MANAGER (EXPLICIT PROPERTY MATCHING) ----------
 async function preloadDeckImages(deck) {
     const allCards = [...deck.cards, ...(deck.sideboard || [])];
     
     const missingIdentifiers = [];
-    const missingCardsSource = []; // Track the original card objects in order
-
     for (const card of allCards) {
-        const key = `${card.set}|${card.name}`;
+        const key = `${card.set}|${card.name}`.toLowerCase();
         if (!CARD_CACHE[key]) {
-            missingIdentifiers.push({ name: card.name, set: card.set.toLowerCase() });
-            missingCardsSource.push(card); // Keep track of this exact reference
+            // Force set uppercase for Scryfall collection API compatibility
+            missingIdentifiers.push({ name: card.name, set: card.set.toUpperCase() });
         }
     }
 
@@ -213,17 +193,29 @@ async function preloadDeckImages(deck) {
         const resultData = await res.json();
 
         if (resultData && resultData.data) {
-            // Use the loop index to map directly back to the matching source object
-            resultData.data.forEach((cardData, index) => {
-                const originalCard = missingCardsSource[index];
+            // FIX: We loop through Scryfall's data independently of input array order
+            resultData.data.forEach((cardData) => {
+                if (!cardData || cardData.status) return;
 
-                if (originalCard) {
-                    const cacheKey = `${originalCard.set}|${originalCard.name}`;
-                    
-                    const img = cardData.image_uris?.normal || 
-                                cardData.card_faces?.[0]?.image_uris?.normal;
-                                
-                    if (img) {
+                // Extract the clean front-face name (e.g., "Delver of Secrets // Insectile Aberration" -> "Delver of Secrets")
+                const scryfallName = cardData.name || "";
+                const cleanName = scryfallName.split("//")[0].trim().toLowerCase();
+                const set = (cardData.set || "").toLowerCase();
+
+                // FIX: Look into card_faces if top-level image_uris are missing (for Delver & Liberator)
+                const img = cardData.image_uris?.normal || 
+                            cardData.card_faces?.[0]?.image_uris?.normal;
+
+                if (img) {
+                    // Find the original matching entry from our deck object to grab its exact text file casing
+                    const originalCard = allCards.find(c => 
+                        c.set.toLowerCase() === set && 
+                        c.name.toLowerCase() === cleanName
+                    );
+
+                    if (originalCard) {
+                        // Store it using the exact case-mapping expected by your fetchCardImage function
+                        const cacheKey = `${originalCard.set}|${originalCard.name}`.toLowerCase();
                         CARD_CACHE[cacheKey] = img;
                     }
                 }
@@ -234,25 +226,14 @@ async function preloadDeckImages(deck) {
     }
 }
 
-// ---------- UPDATE: FETCH CARD IMAGE (MATCH LOWERCASE CACHE LOOKUP) ----------
+// ---------- CARD IMAGE SERVICE LAYER ----------
 async function fetchCardImage(card) {
-    // Force lowercase lookup matching what was saved by the batch script
     const key = `${card.set}|${card.name}`.toLowerCase();
 
     if (CARD_CACHE[key]) return CARD_CACHE[key];
 
-    return "https://via.placeholder.com/146x204?text=Missing";
-}
-
-// ---------- SCRYFALL FETCH (REDUCED TO SYNCHRONOUS CACHE DROP) ----------
-async function fetchCardImage(card) {
-    const key = `${card.set}|${card.name}`;
-
-    // If the batch endpoint grabbed it, return it instantly
-    if (CARD_CACHE[key]) return CARD_CACHE[key];
-
-    // Fallback placeholder image if the collection payload didn't match
-    return "https://via.placeholder.com/146x204?text=Missing";
+    // Clean placeholder card back link when API keys mismatch or break
+    return "https://cards.scryfall.io/large/front/5/7/575e3f83-314c-4d1a-9597-4aed2f86e475.jpg";
 }
 
 // ---------- GROUPING ----------
@@ -260,7 +241,7 @@ function groupByCard(cards) {
     const map = new Map();
 
     for (const c of cards) {
-        const key = `${c.name}|${c.set}`;
+        const key = `${c.name}|${c.set}`.toLowerCase();
 
         if (!map.has(key)) {
             map.set(key, { ...c });
@@ -272,5 +253,4 @@ function groupByCard(cards) {
     return Array.from(map.values());
 }
 
-// ---------- START ----------
 init();

@@ -1,0 +1,41 @@
+4 Dark Ritual [LEA]
+2 Cabal Ritual [TOR]
+3 Lotus Petal [TMP]
+1 Lion's Eye Diamond [MIR]
+
+4 Brainstorm [ICE]
+4 Ponder [LRW]
+1 Consider [MID]
+1 Deep Analysis [TOR]
+1 Insatiable Avarice [OTJ]
+
+4 Force of Will [ALL]
+3 Daze [NEM]
+2 Duress [USG]
+1 Thoughtseize [LRW]
+1 Veil of Summer [M20]
+
+4 Doomsday [WTH]
+2 Dark Petition [ORI]
+2 Edge of Autumn [FUT]
+2 Street Wraith [FUT]
+2 Thassa's Oracle [THB]
+
+3 Underground Sea [LEA]
+1 Tropical Island [LEA]
+1 Bayou [LEA]
+4 Polluted Delta [ONS]
+4 Misty Rainforest [ZEN]
+1 Verdant Catacombs [ZEN]
+1 Cavern of Souls [AVR]
+1 Island [LEA]
+
+SB:
+3 Sheoldred, the Apocalypse [DMU]
+1 Jace, Wielder of Mysteries [WAR]
+3 Carpet of Flowers [USG]
+
+2 Abrupt Decay [RTR]
+2 Veil of Summer [M20]
+1 Nihil Spellbomb [SOM]
+3 Leyline of the Void [GPT]
