@@ -1,0 +1,49 @@
+body {
+    background: #111;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+.page {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* layout */
+.deck-columns {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.deck-column {
+    width: 140px;
+    position: relative;
+    display: block;
+    /* This reserves height so columns don't collapse to 0px */
+    height: calc(196px + (var(--total-cards, 1) - 1) * 75px);
+}
+
+/* cards */
+.deck-card {
+    position: absolute;
+    width: 140px;
+    height: 196px; /* Standard MTG card aspect ratio */
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    left: 0;
+    
+    /* Uniform 75px spacing down the entire column */
+    top: calc(var(--offset) * 75px);
+    
+    transition: transform 0.15s ease;
+}
+
+/* hover behavior */
+.deck-card:hover {
+    transform: scale(1.3);
+    z-index: 9999 !important; /* Pop straight to the front */
+    box-shadow: 0 8px 16px rgba(0,0,0,0.7);
+}
