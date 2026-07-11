@@ -1,4 +1,4 @@
-4 Dark Ritual [LEA]
+4 Dark Ritual [LEB]
 2 Cabal Ritual [TOR]
 3 Lotus Petal [TMP]
 1 Lion's Eye Diamond [MIR]
@@ -21,14 +21,14 @@
 2 Street Wraith [FUT]
 2 Thassa's Oracle [THB]
 
-3 Underground Sea [LEA]
-1 Tropical Island [LEA]
-1 Bayou [LEA]
+3 Underground Sea [LEB]
+1 Tropical Island [LEB]
+1 Bayou [LEB]
 4 Polluted Delta [ONS]
 4 Misty Rainforest [ZEN]
 1 Verdant Catacombs [ZEN]
 1 Cavern of Souls [AVR]
-1 Island [LEA]
+1 Island [LEB]
 
 SB:
 3 Sheoldred, the Apocalypse [DMU]
