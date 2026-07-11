@@ -1,4 +1,122 @@
+// ---------- UNIFIED STYLE ISOLATION LAYER ----------
+(function injectStyles() {
+    // Only inject if it doesn't already exist in the active DOM context
+    if (document.getElementById("hdeck-isolated-styles")) return;
+
+    const style = document.createElement("style");
+    style.id = "hdeck-isolated-styles";
+    style.textContent = `
+        /* --- GLOBAL CONTAINMENT OVERRIDES --- */
+        .legacy-deck-screen-track, .entry-content, .post-content, .wp-block-post-content {
+            overflow: visible !important; 
+        }
+
+        #deck {
+            width: 100%;
+            max-width: 1110px;
+            margin: 40px auto;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        /* 💻 STRICT DESKTOP LAYOUT (Screens above 768px wide) */
+        @media (min-width: 769px) {
+            .legacy-deck-screen-track {
+                width: 100vw;
+                left: 50%;
+                right: 50%;
+                margin-left: -50vw;
+                margin-right: -50vw;
+            }
+            .deck-columns {
+                display: flex !important;
+                gap: 20px !important;
+                align-items: flex-start !important;
+                flex-wrap: nowrap !important; 
+                width: 100% !important;
+                margin: 20px 0 !important;
+            }
+            .deck-column {
+                width: 165px !important; 
+                position: relative !important;
+                display: block !important;
+                height: calc(231px + (var(--total-cards, 1) - 1) * 85px) !important;
+                flex-shrink: 0 !important; 
+            }
+            .deck-card {
+                position: absolute !important;
+                width: 165px !important; 
+                height: 231px !important; 
+                max-width: none !important; /* Defeats theme-enforced image squishing */
+                border-radius: 7px !important; 
+                box-shadow: 0 4px 10px rgba(0,0,0,0.55) !important;
+                left: 0 !important;
+                top: calc(var(--offset) * 85px) !important;
+                transition: transform 0.15s ease !important;
+                will-change: transform;
+            }
+            .deck-card:hover {
+                transform: scale(1.3) !important;
+                z-index: 9999 !important; 
+                box-shadow: 0 14px 28px rgba(0,0,0,0.85) !important;
+            }
+        }
+
+        /* 📱 STRICT MOBILE LAYOUT (Screens 768px or narrower) */
+        @media (max-width: 768px) {
+            .legacy-deck-screen-track {
+                width: 100% !important;
+                left: 0 !important;
+                right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+            #deck {
+                width: 100% !important;
+                overflow-x: auto !important; 
+                overflow-y: visible !important;
+                -webkit-overflow-scrolling: touch !important;
+                padding: 0 5px 25px 5px !important;
+            }
+            .deck-columns {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 12px !important; 
+                width: max-content !important;
+                margin: 15px 0 !important;
+            }
+            .deck-column {
+                width: 110px !important; 
+                position: relative !important;
+                display: block !important;
+                height: calc(154px + (var(--total-cards, 1) - 1) * 45px) !important;
+                flex-shrink: 0 !important;
+            }
+            .deck-card {
+                position: absolute !important;
+                width: 110px !important; 
+                height: 154px !important; 
+                max-width: none !important; 
+                border-radius: 5px !important;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
+                left: 0 !important;
+                top: calc(var(--offset) * 45px) !important; 
+            }
+            .deck-card:hover {
+                transform: scale(1.1) !important;
+                z-index: 9999 !important;
+            }
+        }
+
+        /* CORE TYPOGRAPHY SETTING */
+        #deck h2 { font-size: 1.6rem; margin: 35px 0 15px 0; border-bottom: 2px solid #eaeaea; padding-bottom: 8px; color: #1a1a1a; }
+        #deck h3 { font-size: 1.3rem; color: #333; margin: 30px 0 15px 0; }
+    `;
+    document.head.appendChild(style);
+})();
+
 const CARD_CACHE = {};
+// ... Everything else inside deck.js stays exactly the same as your stable build ...
 
 // ---------- INIT ----------
 async function init() {
