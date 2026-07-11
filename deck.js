@@ -23,6 +23,7 @@
         @media (min-width: 769px) {
             .legacy-deck-screen-track {
                 width: 100vw;
+                position: relative;
                 left: 50%;
                 right: 50%;
                 margin-left: -50vw;
@@ -40,6 +41,7 @@
                 width: 165px !important; 
                 position: relative !important;
                 display: block !important;
+                /* Restores your native 85px stacking height calculation */
                 height: calc(231px + (var(--total-cards, 1) - 1) * 85px) !important;
                 flex-shrink: 0 !important; 
             }
@@ -51,6 +53,7 @@
                 border-radius: 7px !important; 
                 box-shadow: 0 4px 10px rgba(0,0,0,0.55) !important;
                 left: 0 !important;
+                /* Restores your native 85px vertical cascade step */
                 top: calc(var(--offset) * 85px) !important;
                 transition: transform 0.15s ease !important;
                 will-change: transform;
@@ -89,6 +92,7 @@
                 width: 110px !important; 
                 position: relative !important;
                 display: block !important;
+                /* Clean proportional mobile height allocation using 45px cascade steps */
                 height: calc(154px + (var(--total-cards, 1) - 1) * 45px) !important;
                 flex-shrink: 0 !important;
             }
@@ -100,6 +104,7 @@
                 border-radius: 5px !important;
                 box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
                 left: 0 !important;
+                /* Clean proportional mobile vertical stack steps */
                 top: calc(var(--offset) * 45px) !important; 
             }
             .deck-card:hover {
@@ -108,7 +113,7 @@
             }
         }
 
-        /* CORE TYPOGRAPHY SETTING */
+        /* CORE TYPOGRAPHY SETTINGS */
         #deck h2 { font-size: 1.6rem; margin: 35px 0 15px 0; border-bottom: 2px solid #eaeaea; padding-bottom: 8px; color: #1a1a1a; }
         #deck h3 { font-size: 1.3rem; color: #333; margin: 30px 0 15px 0; }
     `;
@@ -138,6 +143,31 @@ async function init() {
     }
 }
 
+// ---------- THE CLEAN CONFIGURATION DICTIONARY ----------
+const DECK_TITLES = {
+    'urdelver': 'UR Delver',
+    '4cloam': '4C Loam',
+    'bantbeans': 'Bant Beans',
+    'cradlecontrol': 'Cradle Control',
+    'doomsday' : 'Doomsday',
+    'sneakandshow' : 'Sneak and Show',
+    'looternought' : 'Looternought'
+    // Just add new text filenames here as you build them
+};
+
+function formatDeckName(filePath) {
+    // 1. Extract just the filename (e.g., "decks/urdelver.txt" -> "urdelver")
+    let filename = filePath.split('/').pop().replace('.txt', '').toLowerCase().trim();
+
+    // 2. Check the dictionary first
+    if (DECK_TITLES[filename]) {
+        return DECK_TITLES[filename];
+    }
+
+    // 3. Simple fallback: Capitalize the very first letter if it's missing from the dictionary
+    return filename.charAt(0).toUpperCase() + filename.slice(1);
+}
+
 // ---------- LOAD DECK FILE ----------
 // Added basePath as a parameter here to resolve relative text paths
 async function loadDeck(file, container, basePath) {
@@ -151,7 +181,7 @@ async function loadDeck(file, container, basePath) {
     await preloadDeckImages(deck);
 
     const title = document.createElement("h2");
-    title.textContent = file.split("/").pop().replace(".txt", "");
+    title.textContent = formatDeckName(file);
     container.appendChild(title);
 
     // 2. Render safely knowing the images are already in CARD_CACHE
