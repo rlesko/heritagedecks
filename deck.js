@@ -2,19 +2,29 @@ const CARD_CACHE = {};
 
 // ---------- INIT ----------
 async function init() {
-    const res = await fetch("decks.json");
+    // 1. Detect if the app is running on a live external site (like WordPress)
+    const isExternal = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    
+    // 2. Base URL path: Use your GitHub Pages URL for external sites, or empty string for local dev
+    const basePath = isExternal ? 'https://rlesko.github.io/heritagedecks/' : '';
+
+    // 3. Dynamically fetch the master index from the correct location
+    const res = await fetch(`${basePath}decks.json`);
     const files = await res.json();
 
     const container = document.getElementById("deck");
 
     for (const file of files) {
-        await loadDeck(file, container);
+        // 4. Pass the basePath down to loadDeck so it can locate the individual text files
+        await loadDeck(file, container, basePath);
     }
 }
 
 // ---------- LOAD DECK FILE ----------
-async function loadDeck(file, container) {
-    const res = await fetch(file);
+// Added basePath as a parameter here to resolve relative text paths
+async function loadDeck(file, container, basePath) {
+    // 5. Prefix the file path dynamically so it evaluates correctly everywhere
+    const res = await fetch(`${basePath}${file}`);
     const deckText = await res.text();
 
     const deck = parseDeck(deckText);
