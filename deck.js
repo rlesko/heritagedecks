@@ -1,6 +1,5 @@
 // ---------- UNIFIED STYLE ISOLATION LAYER ----------
 (function injectStyles() {
-    // Only inject if it doesn't already exist in the active DOM context
     if (document.getElementById("hdeck-isolated-styles")) return;
 
     const style = document.createElement("style");
@@ -11,15 +10,13 @@
             overflow: visible !important; 
         }
 
-        #deck {
-            width: 100%;
-            max-width: 1100px; /* Matches your .page max-width */
+        .page {
+            max-width: 1100px;
             margin: 40px auto;
             padding: 0 20px;
-            box-sizing: border-box;
         }
 
-        /* 💻 STRICT DESKTOP LAYOUT (Screens above 768px wide) */
+        /* 💻 EXACT ORIGINAL DESKTOP LAYOUT (Screens above 768px wide) */
         @media (min-width: 769px) {
             .legacy-deck-screen-track {
                 width: 100vw;
@@ -30,36 +27,31 @@
                 margin-right: -50vw;
             }
             .deck-columns {
-                display: flex !important;
-                gap: 20px !important;
-                align-items: flex-start !important;
-                flex-wrap: nowrap !important; 
-                width: 100% !important;
-                margin: 20px 0 !important;
+                display: flex;
+                gap: 20px;
+                align-items: flex-start;
             }
             .deck-column {
-                width: 140px !important; /* MATCHED TO ORIGINAL */
-                position: relative !important;
-                display: block !important;
-                height: calc(196px + (var(--total-cards, 1) - 1) * 75px) !important; /* MATCHED TO ORIGINAL */
-                flex-shrink: 0 !important; 
+                width: 140px;
+                position: relative;
+                display: block;
+                height: calc(196px + (var(--total-cards, 1) - 1) * 75px);
             }
             .deck-card {
-                position: absolute !important;
-                width: 140px !important; /* MATCHED TO ORIGINAL */
-                height: 196px !important; /* MATCHED TO ORIGINAL */
-                max-width: none !important; 
-                border-radius: 6px !important; /* MATCHED TO ORIGINAL */
-                box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important; /* MATCHED TO ORIGINAL */
-                left: 0 !important;
-                top: calc(var(--offset) * 75px) !important; /* MATCHED TO ORIGINAL */
-                transition: transform 0.15s ease !important;
-                will-change: transform;
+                position: absolute;
+                width: 140px;
+                height: 196px;
+                max-width: none !important; /* Forces WP to respect your 140px layout width */
+                border-radius: 6px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+                left: 0;
+                top: calc(var(--offset) * 75px);
+                transition: transform 0.15s ease;
             }
             .deck-card:hover {
-                transform: scale(1.3) !important;
-                z-index: 9999 !important; 
-                box-shadow: 0 8px 16px rgba(0,0,0,0.7) !important; /* MATCHED TO ORIGINAL */
+                transform: scale(1.3);
+                z-index: 9999 !important;
+                box-shadow: 0 8px 16px rgba(0,0,0,0.7);
             }
         }
 
@@ -73,38 +65,37 @@
                 margin-right: 0;
             }
             #deck {
-                width: 100% !important;
-                overflow-x: auto !important; 
-                overflow-y: visible !important;
-                -webkit-overflow-scrolling: touch !important;
-                padding: 0 5px 25px 5px !important;
+                width: 100%;
+                overflow-x: auto; 
+                overflow-y: visible;
+                -webkit-overflow-scrolling: touch;
+                padding: 0 5px 25px 5px;
             }
             .deck-columns {
-                display: flex !important;
-                flex-direction: row !important;
-                gap: 12px !important; 
-                width: max-content !important;
-                margin: 15px 0 !important;
+                display: flex;
+                flex-direction: row;
+                gap: 12px; 
+                width: max-content;
+                margin: 15px 0;
             }
             .deck-column {
-                width: 110px !important; 
-                position: relative !important;
-                display: block !important;
-                height: calc(154px + (var(--total-cards, 1) - 1) * 45px) !important;
-                flex-shrink: 0 !important;
+                width: 110px; 
+                position: relative;
+                display: block;
+                height: calc(154px + (var(--total-cards, 1) - 1) * 45px);
             }
             .deck-card {
-                position: absolute !important;
-                width: 110px !important; 
-                height: 154px !important; 
-                max-width: none !important; 
-                border-radius: 5px !important;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
-                left: 0 !important;
-                top: calc(var(--offset) * 45px) !important; 
+                position: absolute;
+                width: 110px; 
+                height: 154px; 
+                max-width: none !important;
+                border-radius: 5px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                left: 0;
+                top: calc(var(--offset) * 45px); 
             }
             .deck-card:hover {
-                transform: scale(1.1) !important;
+                transform: scale(1.1);
                 z-index: 9999 !important;
             }
         }
@@ -143,7 +134,8 @@ const DECK_TITLES = {
     'cradlecontrol': 'Cradle Control',
     'doomsday' : 'Doomsday',
     'sneakandshow' : 'Sneak and Show',
-    'looternought' : 'Looternought'
+    'looternought' : 'Looternought',
+    'elves' : 'Elves!'
     // Just add new text filenames here as you build them
 };
 
